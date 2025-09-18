@@ -1,0 +1,21 @@
+name: remote ssh command
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/projects/yandex_audio_quest/Barsukot
+          git config core.sparseCheckout true
+          echo "dist/" > .git/info/sparse-checkout
+          git pull origin main
+          systemctl restart nginx
