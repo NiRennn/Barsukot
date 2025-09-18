@@ -40,7 +40,7 @@ export default function TextAudio({ text, audio }: TextAudioProps) {
           <p className="textaudio__text">{text}</p>
         </div>
       )}
-
+ 
       {audio && (
         <div className="textaudio__player">
           <AudioPlayer

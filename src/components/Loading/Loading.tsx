@@ -30,7 +30,7 @@ function Loading() {
   useEffect(() => {
     const app = (window as any)?.Telegram?.WebApp;
 
-        const platform = window.Telegram.WebApp.platform;
+    const platform = window.Telegram.WebApp.platform;
 
     try {
       if (
@@ -62,6 +62,7 @@ function Loading() {
         const user_data_str = parseQuery(query).user;
         const user_data = user_data_str ? JSON.parse(user_data_str) : null;
         const id = user_data?.id ? Number(user_data.id) : NaN;
+        // const id = 5789474743;
         return Number.isFinite(id) ? id : null;
       } catch {
         return null;

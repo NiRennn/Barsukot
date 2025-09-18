@@ -10,14 +10,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  // justify-content: space-between;
   overflow: hidden;
+  position: relative;
 }
 
 .unified__logo {
   width: 30%;
   max-width: 150px;
-  margin-top: 40px;
+  margin-top: 55px;
   margin-bottom: 20px;
   object-fit: contain;
 }
@@ -41,6 +42,9 @@
 
 .unified__answer-block {
   width: 100%;
+  position: fixed;
+  left: 0;
+  bottom: 0;
   padding: 30px 25px;
   background-color: #2A2326;
   border-radius: 40px 40px 0 0;
@@ -133,7 +137,7 @@
   .unified__logo {
     width: 40%;
     max-width: 150px;
-    margin-top: 20px;
+    margin-top: 40px;
     margin-bottom: 20px;
   }
 
