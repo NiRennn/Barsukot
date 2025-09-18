@@ -153,49 +153,54 @@ const StoryPage: React.FC = () => {
     return () => clearTimeout(t);
   }, []);
 
-useEffect(() => {
-  if (questionsList.length > 0) return;
+  useEffect(() => {
+    if (questionsList.length > 0) return;
 
-  let cancelled = false;
-  const userId = getEffectiveUserId();
-  if (!userId) {
-    console.warn("StoryPage bootstrap: user_id не найден, пропускаю загрузку.");
-    return;
-  }
-
-  const load = async () => {
-    try {
-      const res = await fetch(
-        `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${userId}`
+    let cancelled = false;
+    const userId = getEffectiveUserId();
+    if (!userId) {
+      console.warn(
+        "StoryPage bootstrap: user_id не найден, пропускаю загрузку."
       );
-      const data = await res.json();
-      if (cancelled) return;
-
-      dispatch(setQuestions(data.questions));
-      dispatch(setAnswers(data.answers));
-      dispatch(setFinals(data.final_variants));
-
-      const savedIdStr = sessionStorage.getItem("barsukot.currentQuestionId");
-      const savedId = savedIdStr ? Number(savedIdStr) : NaN;
-      const byId = data.questions.find((q: any) => q.id === savedId);
-      const byOrder = [...data.questions].sort(
-        (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)
-      )[0];
-      const startQ = byId || byOrder;
-
-      dispatch(setCurrentQuestion(startQ));
-      dispatch(setCurrentAnswers((data.answers || []).filter(
-        (a: any) => a.question_id === startQ.id
-      )));
-    } catch (e) {
-      console.error("Bootstrap fetch failed:", e);
+      return;
     }
-  };
 
-  load();
-  return () => { cancelled = true; };
-}, [questionsList.length, dispatch]);
+    const load = async () => {
+      try {
+        const res = await fetch(
+          `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${userId}`
+        );
+        const data = await res.json();
+        if (cancelled) return;
 
+        dispatch(setQuestions(data.questions));
+        dispatch(setAnswers(data.answers));
+        dispatch(setFinals(data.final_variants));
+
+        const savedIdStr = sessionStorage.getItem("barsukot.currentQuestionId");
+        const savedId = savedIdStr ? Number(savedIdStr) : NaN;
+        const byId = data.questions.find((q: any) => q.id === savedId);
+        const byOrder = [...data.questions].sort(
+          (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)
+        )[0];
+        const startQ = byId || byOrder;
+
+        dispatch(setCurrentQuestion(startQ));
+        dispatch(
+          setCurrentAnswers(
+            (data.answers || []).filter((a: any) => a.question_id === startQ.id)
+          )
+        );
+      } catch (e) {
+        console.error("Bootstrap fetch failed:", e);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [questionsList.length, dispatch]);
 
   useEffect(() => {
     if (currentQuestion?.id != null) {
