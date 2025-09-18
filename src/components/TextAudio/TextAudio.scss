@@ -7,6 +7,7 @@
   align-items: center;
   text-align: center;
   gap: 15px;
+  margin-top: 20px;
 }
 
 .textaudio__textwrap {
@@ -16,13 +17,15 @@
   overflow: auto;
   padding-right: 6px;
   scrollbar-gutter: stable both-edges;
-   overflow: auto;  
+  overflow: auto;
 }
 
-.textaudio__textwrap::-webkit-scrollbar { width: 2px; }
+.textaudio__textwrap::-webkit-scrollbar {
+  width: 2px;
+}
 .textaudio__textwrap::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: rgba(255,255,255,0.35);
+  background: rgba(255, 255, 255, 0.35);
 }
 .textaudio__textwrap::-webkit-scrollbar-track {
   background: transparent;
@@ -37,7 +40,11 @@
   height: 36px;
   display: block;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   margin-top: -36px;
@@ -49,14 +56,12 @@
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: 0.02em;
-  font-family: 'Graphik-regular';
-  
-  
+  font-family: "Graphik-regular";
 }
 
 .textaudio__player {
   width: 100%;
-  max-width: 304px;
+  max-width: 300px;
   height: 43px;
   background: linear-gradient(180deg, #38322f 0%, #312e30 100%);
   border-radius: 9999px;
@@ -86,8 +91,6 @@
   flex: 0 0 auto !important;
   margin: 0 !important;
 }
- 
-
 
 .textaudio__audioplayer .rhap_main-controls-button {
   width: 43px;
@@ -100,11 +103,10 @@
   display: grid;
   place-items: center;
   color: #ffffff;
-  background: linear-gradient(to bottom, #FDBB05, #BC711A);
+  background: linear-gradient(to bottom, #fdbb05, #bc711a);
   position: relative;
   cursor: pointer;
-    box-shadow: 0 4px 25px rgba(253, 187, 5, 0.34);
-
+  box-shadow: 0 4px 25px rgba(253, 187, 5, 0.34);
 }
 
 .textaudio__audioplayer .rhap_progress-section {
@@ -123,7 +125,6 @@
   height: 4px !important;
   border-radius: 9999px !important;
   background: rgba(255, 255, 255, 0.25) !important;
-  
 }
 
 .textaudio__audioplayer .rhap_progress-filled {
@@ -177,7 +178,7 @@
   flex: 1 1 0 !important;
   min-width: 0 !important;
   margin-left: 0 !important;
-  padding-left: 24px !important; 
+  padding-left: 24px !important;
 }
 
 .textaudio__audioplayer .rhap_progress-container,
@@ -186,3 +187,26 @@
   margin-left: 0 !important;
 }
 
+
+@media (max-height: 730px) {
+
+  .textaudio__text {
+    font-size: 12px;
+  }
+
+  .textaudio__player {
+  width: 100%;
+  max-width: 300px;
+  height: 35px;
+}
+
+.textaudio__audioplayer .rhap_main-controls-button {
+  width: 35px;
+  height: 35px;
+  min-width: 35px;
+  min-height: 35px;
+
+
+}
+
+}

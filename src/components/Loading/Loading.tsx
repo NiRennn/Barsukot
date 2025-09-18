@@ -6,7 +6,7 @@ import appRoutes from "../../routes/routes";
 import { useDispatch } from "react-redux";
 import {
   setCurrentQuestion,
-  setQuestions
+  setQuestions,
 } from "../../store/slices/questionsSlice";
 import { setAnswers, setCurrentAnswers } from "../../store/slices/answersSlice";
 import { setFinals } from "../../store/slices/finalsSlice";
@@ -14,7 +14,6 @@ import { setFinals } from "../../store/slices/finalsSlice";
 function Loading() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
 
   function parseQuery(queryString: string): any {
     let query: any = {};
@@ -28,51 +27,83 @@ function Loading() {
     return query;
   }
 
+useEffect(() => {
+  const app = (window as any)?.Telegram?.WebApp;
+  const parseTgUserId = () => {
+    try {
+      const query = app?.initData ?? "";
+      const user_data_str = parseQuery(query).user;
+      const user_data = user_data_str ? JSON.parse(user_data_str) : null;
+      const id = user_data?.id ? Number(user_data.id) : NaN;
+      return Number.isFinite(id) ? id : null;
+    } catch {
+      return null;
+    }
+  };
 
-  useEffect(() => {
+  app?.setHeaderColor("#f3f9ff");
+  app?.setBackgroundColor("#f3f9ff");
+  app?.setBottomBarColor("#f3f9ff");
 
-    let app = window.Telegram.WebApp;
-    let query = app.initData;
-    let user_data_str = parseQuery(query).user;
-    let user_data = JSON.parse(user_data_str);
-    app.setHeaderColor("#f3f9ff");
-    app.setBackgroundColor("#f3f9ff");
-    app.setBottomBarColor("#f3f9ff");
-    let userChatId: any = user_data["id"];
-    // let userChatId: number = 5789474743;
+  const effectiveUserId: number = parseTgUserId() ?? 5789474743;
 
- 
+  let isCancelled = false;
 
-    const fetchQuestionsAnswers = async () => {
-      try {
-        const result = await fetch(
-          `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${userChatId}`
-        );
-        const data = await result.json();
+  const preloadImage = (src: string) =>
+    new Promise<void>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      img.src = src;
+      if (img.complete) resolve();
+    });
 
-        dispatch(setQuestions(data.questions));
-        dispatch(setAnswers(data.answers));
-        dispatch(setFinals(data.final_variants));
+  const criticalImages = [
+    "/images/bg1.svg",
+    "/images/blink-top.svg",
+    "/images/blink-bot.svg",
+  ];
 
+  const loadData = async () => {
+    try {
+      const [data] = await Promise.all([
+        fetch(
+          `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${effectiveUserId}`
+        ).then((r) => r.json()),
+      ]);
 
-        const question = data.questions.find((q: any) => q.id === 53);
-        dispatch(setCurrentQuestion(question));
+      if (isCancelled) return;
 
-        const answersForStart = (data.answers || []).filter(
-          (a: any) => a.question_id === 53
-        );
-        dispatch(setCurrentAnswers(answersForStart));
+      dispatch(setQuestions(data.questions));
+      dispatch(setAnswers(data.answers));
+      dispatch(setFinals(data.final_variants));
 
-        setTimeout(() => {
-          navigate(appRoutes.STORY, { replace: true });
-        }, 3000);
-      } catch (error) {
-        console.error("Ошибка загрузки данных:", error);
-      }
-    };
+      const question = data.questions.find((q: any) => q.id === 53);
+      dispatch(setCurrentQuestion(question));
 
-    fetchQuestionsAnswers();
-  }, [dispatch, navigate]);
+      const answersForStart = (data.answers || []).filter(
+        (a: any) => a.question_id === 53
+      );
+      dispatch(setCurrentAnswers(answersForStart));
+
+      const imagesReady = Promise.all(criticalImages.map(preloadImage));
+      const minDelay = new Promise<void>((res) => setTimeout(res, 1200));
+      await Promise.all([imagesReady, minDelay]);
+
+      if (isCancelled) return;
+      navigate(appRoutes.STORY, { replace: true });
+    } catch (error) {
+      console.error("Ошибка загрузки данных:", error);
+      navigate(appRoutes.STORY, { replace: true });
+    }
+  };
+
+  loadData();
+  return () => {
+    isCancelled = true;
+  };
+}, [dispatch, navigate]);
+
 
   return (
     <div className="loading">

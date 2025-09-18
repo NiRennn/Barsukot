@@ -8,8 +8,16 @@ import { setCurrentAnswers } from "../../store/slices/answersSlice";
 import { setCurrentQuestion } from "../../store/slices/questionsSlice";
 import { selectFinals } from "../../store/slices/finalsSlice";
 import "./StoryPage.scss";
+import AgainButton from "../AgainButton/AgainButton";
 
 type ID = number | string;
+
+export interface QuestionBtn {
+  id: ID;
+  text: string;
+  url?: string | null;
+  logo?: string | null;
+}
 
 export interface Question {
   id: ID;
@@ -18,6 +26,7 @@ export interface Question {
   picture?: string | null;
   order?: number | null;
   final?: boolean;
+  btns?: QuestionBtn[]; // ← добавили кнопки из БД
 }
 export interface Answer {
   id: ID;
@@ -92,6 +101,7 @@ const StoryPage: React.FC = () => {
   const isSingle = answersArray.length === 1;
 
   const isVersionSelect = questionOrder === 10;
+  const isFinalQuestion = !!currentQuestion?.final; // ← финальная страница с кнопками из БД
 
   useEffect(() => {
     const t = setTimeout(() => setIsOpeningOnMount(true), 30);
@@ -114,6 +124,27 @@ const StoryPage: React.FC = () => {
     },
     [answersList, dispatch, questionsList]
   );
+
+  const restartToFirst = useCallback(() => {
+    // моргание + переход к самому раннему по order
+    setIsBlinking(true);
+    setTimeout(() => {
+      const first = [...questionsList].sort(
+        (a, b) => (a.order ?? 0) - (b.order ?? 0)
+      )[0];
+      if (!first) {
+        console.warn("Не найден стартовый вопрос (минимальный order).");
+        setIsBlinking(false);
+        return;
+      }
+      const firstAnswers = (answersList || []).filter(
+        (a) => a.question_id === first.id
+      );
+      dispatch(setCurrentQuestion(first));
+      dispatch(setCurrentAnswers(firstAnswers));
+      setIsBlinking(false);
+    }, 700);
+  }, [answersList, dispatch, questionsList]);
 
   const startFinalFlow = useCallback(() => {
     if (!sortedFinals.length) {
@@ -215,6 +246,37 @@ const StoryPage: React.FC = () => {
     );
   };
 
+const renderFinalButtons = () => {
+  const btns = currentQuestion?.btns || [];
+  if (!btns.length) return null;
+
+  return (
+    <div className="unified__final-buttons">
+      {btns.map((b) => {
+        if (b.url) {
+          const onClick = () => window.open(b.url!, "_blank", "noopener,noreferrer");
+          return (
+            <Button
+              key={`btn-${String(b.id)}`}
+              text={b.text}
+              onClick={onClick}
+            />
+          );
+        }
+
+        return (
+          <AgainButton
+            key={`btn-${String(b.id)}`}
+            text={b.text}
+            onClick={restartToFirst}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+
   return (
     <div
       className={[
@@ -252,7 +314,9 @@ const StoryPage: React.FC = () => {
 
       {!isVersionSelect && (
         <div className="unified__answer-block">
-          {isFinalFlow ? (
+          {isFinalQuestion ? (
+            renderFinalButtons()
+          ) : isFinalFlow ? (
             <Button
               text={finalIdx + 1 < sortedFinals.length ? "Продолжить" : "К вариантам"}
               onClick={advanceFinalFlow}
