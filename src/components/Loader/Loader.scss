@@ -1,0 +1,30 @@
+.loader {
+  width: 100%;
+  height: 6px;
+  background-color: #ffffff1a;
+  border-radius: 318px;
+  height: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loader::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(to bottom, #fdbb05, #bc711a);
+  border-radius: 318px;
+  animation: fill 3s linear forwards;
+}
+
+@keyframes fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
