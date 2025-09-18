@@ -4,9 +4,13 @@ import type { TypedUseSelectorHook } from "react-redux";
 import TextAudio from "../../components/TextAudio/TextAudio";
 import Button from "../../components/Button/Button";
 import Choices from "../Choices/Choices";
-import { setCurrentAnswers } from "../../store/slices/answersSlice";
-import { setCurrentQuestion } from "../../store/slices/questionsSlice";
-import { selectFinals } from "../../store/slices/finalsSlice";
+import {
+  setQuestions,
+  setCurrentQuestion,
+} from "../../store/slices/questionsSlice";
+import { setAnswers, setCurrentAnswers } from "../../store/slices/answersSlice";
+import { setFinals, selectFinals } from "../../store/slices/finalsSlice";
+
 import "./StoryPage.scss";
 import AgainButton from "../AgainButton/AgainButton";
 
@@ -26,7 +30,7 @@ export interface Question {
   picture?: string | null;
   order?: number | null;
   final?: boolean;
-  btns?: QuestionBtn[]; // ← добавили кнопки из БД
+  btns?: QuestionBtn[]; // кнопки из БД на финальном экране
 }
 export interface Answer {
   id: ID;
@@ -47,7 +51,14 @@ export interface AnswersState {
 export interface RootState {
   questions: QuestionsState;
   answers: AnswersState;
-  finals: { list: { id: ID; text: string; audio?: string | null; order?: number | null }[] };
+  finals: {
+    list: {
+      id: ID;
+      text: string;
+      audio?: string | null;
+      order?: number | null;
+    }[];
+  };
 }
 
 type AppDispatch = any;
@@ -61,6 +72,39 @@ const makeAbsolute = (path?: string | null) => {
   if (/^https?:\/\//i.test(path)) return path;
   return `https://barsukot.brandservicebot.ru${path}`;
 };
+
+const parseQuery = (queryString: string): any => {
+  const query: any = {};
+  const pairs = (
+    queryString[0] === "?" ? queryString.substr(1) : queryString
+  ).split("&");
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i].split("=");
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
+  }
+  return query;
+};
+
+const getEffectiveUserId = (): number | null => {
+  try {
+    const app = (window as any)?.Telegram?.WebApp;
+    const query = app?.initData ?? "";
+    const user_data_str = parseQuery(query).user;
+    const user_data = user_data_str ? JSON.parse(user_data_str) : null;
+    const idFromTg = user_data?.id ? Number(user_data.id) : NaN;
+    if (Number.isFinite(idFromTg)) return idFromTg;
+  } catch {}
+
+  try {
+    const p = new URLSearchParams(window.location.search).get("user_id");
+    const idFromQuery = p ? Number(p) : NaN;
+    if (Number.isFinite(idFromQuery)) return idFromQuery;
+  } catch {}
+
+  return null;
+};
+
+const STORAGE_KEY = "barsukot.currentQuestionId";
 
 const StoryPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -85,7 +129,8 @@ const StoryPage: React.FC = () => {
         .slice()
         .sort(
           (a, b) =>
-            (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER)
+            (a.order ?? Number.MAX_SAFE_INTEGER) -
+            (b.order ?? Number.MAX_SAFE_INTEGER)
         ),
     [finalsList]
   );
@@ -101,16 +146,93 @@ const StoryPage: React.FC = () => {
   const isSingle = answersArray.length === 1;
 
   const isVersionSelect = questionOrder === 10;
-  const isFinalQuestion = !!currentQuestion?.final; // ← финальная страница с кнопками из БД
+  const isFinalQuestion = !!currentQuestion?.final;
 
   useEffect(() => {
     const t = setTimeout(() => setIsOpeningOnMount(true), 30);
     return () => clearTimeout(t);
   }, []);
 
+useEffect(() => {
+  if (questionsList.length > 0) return;
+
+  let cancelled = false;
+  const userId = getEffectiveUserId();
+  if (!userId) {
+    console.warn("StoryPage bootstrap: user_id не найден, пропускаю загрузку.");
+    return;
+  }
+
+  const load = async () => {
+    try {
+      const res = await fetch(
+        `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${userId}`
+      );
+      const data = await res.json();
+      if (cancelled) return;
+
+      dispatch(setQuestions(data.questions));
+      dispatch(setAnswers(data.answers));
+      dispatch(setFinals(data.final_variants));
+
+      const savedIdStr = sessionStorage.getItem("barsukot.currentQuestionId");
+      const savedId = savedIdStr ? Number(savedIdStr) : NaN;
+      const byId = data.questions.find((q: any) => q.id === savedId);
+      const byOrder = [...data.questions].sort(
+        (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)
+      )[0];
+      const startQ = byId || byOrder;
+
+      dispatch(setCurrentQuestion(startQ));
+      dispatch(setCurrentAnswers((data.answers || []).filter(
+        (a: any) => a.question_id === startQ.id
+      )));
+    } catch (e) {
+      console.error("Bootstrap fetch failed:", e);
+    }
+  };
+
+  load();
+  return () => { cancelled = true; };
+}, [questionsList.length, dispatch]);
+
+
+  useEffect(() => {
+    if (currentQuestion?.id != null) {
+      sessionStorage.setItem(STORAGE_KEY, String(currentQuestion.id));
+    }
+  }, [currentQuestion?.id]);
+
+  useEffect(() => {
+    if (!questionsList.length || currentQuestion) return;
+
+    const savedIdStr = sessionStorage.getItem(STORAGE_KEY);
+    const savedId = savedIdStr ? Number(savedIdStr) : NaN;
+
+    const fallback = [...questionsList].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0)
+    )[0];
+
+    const q =
+      (Number.isFinite(savedId) &&
+        questionsList.find((qq) => qq.id === savedId)) ||
+      fallback;
+
+    if (q) {
+      dispatch(setCurrentQuestion(q));
+      dispatch(
+        setCurrentAnswers(
+          (answersList || []).filter((a) => a.question_id === q.id)
+        )
+      );
+    }
+  }, [questionsList, currentQuestion, answersList, dispatch]);
+
   const gotoQuestionByOrder = useCallback(
     (orderValue: number) => {
-      const nextQuestion = questionsList.find((q) => (q.order ?? null) === orderValue);
+      const nextQuestion = questionsList.find(
+        (q) => (q.order ?? null) === orderValue
+      );
       if (!nextQuestion) {
         console.warn(`Не найден вопрос с order = ${orderValue}`);
         return false;
@@ -126,7 +248,6 @@ const StoryPage: React.FC = () => {
   );
 
   const restartToFirst = useCallback(() => {
-    // моргание + переход к самому раннему по order
     setIsBlinking(true);
     setTimeout(() => {
       const first = [...questionsList].sort(
@@ -204,7 +325,9 @@ const StoryPage: React.FC = () => {
 
   const finalSlide = isFinalFlow ? sortedFinals[finalIdx] : null;
   const effectiveText = isFinalFlow ? finalSlide?.text ?? "" : questionText;
-  const effectiveAudio = isFinalFlow ? finalSlide?.audio ?? null : questionAudio;
+  const effectiveAudio = isFinalFlow
+    ? finalSlide?.audio ?? null
+    : questionAudio;
 
   const renderVersionImageButtons = () => {
     if (!answersArray.length) return null;
@@ -246,36 +369,35 @@ const StoryPage: React.FC = () => {
     );
   };
 
-const renderFinalButtons = () => {
-  const btns = currentQuestion?.btns || [];
-  if (!btns.length) return null;
+  const renderFinalButtons = () => {
+    const btns = currentQuestion?.btns || [];
+    if (!btns.length) return null;
 
-  return (
-    <div className="unified__final-buttons">
-      {btns.map((b) => {
-        if (b.url) {
-          const onClick = () => window.open(b.url!, "_blank", "noopener,noreferrer");
+    return (
+      <div className="unified__final-buttons">
+        {btns.map((b) => {
+          if (b.url) {
+            const onClick = () =>
+              window.open(b.url!, "_blank", "noopener,noreferrer");
+            return (
+              <Button
+                key={`btn-${String(b.id)}`}
+                text={b.text}
+                onClick={onClick}
+              />
+            );
+          }
           return (
-            <Button
+            <AgainButton
               key={`btn-${String(b.id)}`}
               text={b.text}
-              onClick={onClick}
+              onClick={restartToFirst}
             />
           );
-        }
-
-        return (
-          <AgainButton
-            key={`btn-${String(b.id)}`}
-            text={b.text}
-            onClick={restartToFirst}
-          />
-        );
-      })}
-    </div>
-  );
-};
-
+        })}
+      </div>
+    );
+  };
 
   return (
     <div
@@ -318,11 +440,18 @@ const renderFinalButtons = () => {
             renderFinalButtons()
           ) : isFinalFlow ? (
             <Button
-              text={finalIdx + 1 < sortedFinals.length ? "Продолжить" : "К вариантам"}
+              text={
+                finalIdx + 1 < sortedFinals.length
+                  ? "Продолжить"
+                  : "К вариантам"
+              }
               onClick={advanceFinalFlow}
             />
           ) : isSingle ? (
-            <Button text={answersArray[0]?.text ?? ""} onClick={handleSingleClick} />
+            <Button
+              text={answersArray[0]?.text ?? ""}
+              onClick={handleSingleClick}
+            />
           ) : (
             <Choices answers={answersArray} onSelect={handleChoiceClick} />
           )}

@@ -29,7 +29,8 @@ function Loading() {
 
 useEffect(() => {
   const app = (window as any)?.Telegram?.WebApp;
-  const parseTgUserId = () => {
+
+  const parseTgUserId = (): number | null => {
     try {
       const query = app?.initData ?? "";
       const user_data_str = parseQuery(query).user;
@@ -41,11 +42,21 @@ useEffect(() => {
     }
   };
 
+  const getUserIdFromQuery = (): number | null => {
+    try {
+      const p = new URLSearchParams(window.location.search).get("user_id");
+      const id = p ? Number(p) : NaN;
+      return Number.isFinite(id) ? id : null;
+    } catch {
+      return null;
+    }
+  };
+
   app?.setHeaderColor("#f3f9ff");
   app?.setBackgroundColor("#f3f9ff");
   app?.setBottomBarColor("#f3f9ff");
 
-  const effectiveUserId: number = parseTgUserId() ?? 5789474743;
+  const effectiveUserId = parseTgUserId() ?? getUserIdFromQuery();
 
   let isCancelled = false;
 
@@ -66,6 +77,12 @@ useEffect(() => {
 
   const loadData = async () => {
     try {
+      if (!effectiveUserId) {
+        console.warn("Не удалось определить user_id (TG/URL). Пропускаю fetch.");
+        navigate(appRoutes.STORY, { replace: true });
+        return;
+      }
+
       const [data] = await Promise.all([
         fetch(
           `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${effectiveUserId}`
@@ -103,6 +120,7 @@ useEffect(() => {
     isCancelled = true;
   };
 }, [dispatch, navigate]);
+
 
 
   return (
