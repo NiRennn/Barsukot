@@ -1,4 +1,3 @@
-import React from "react";
 import "./Choices.scss";
 
 type ID = number | string;
@@ -8,7 +7,7 @@ export interface Answer {
   question_id: ID;
   text: string;
   next_question_id?: ID | null;
-  logo: string;
+  logo?: string | null;
 }
 
 interface ChoicesProps {

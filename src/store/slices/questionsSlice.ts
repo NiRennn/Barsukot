@@ -1,6 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
+type Status = "idle" | "loading" | "succeeded" | "failed";
+
+interface QuestionsState {
+  list: [];
+  currentQuestion: [] | null;
+  status: Status;
+  error: string | null;
+}
+
+const initialState: QuestionsState = {
   list: [],
   currentQuestion: null,
   status: "idle",
@@ -34,7 +43,7 @@ const questionsSlice = createSlice({
       state.error = null;
     },
   },
-}); 
+});
 
 export const {
   setQuestions,
@@ -46,7 +55,7 @@ export const {
 
 export default questionsSlice.reducer;
 
-export const selectQuestions = (state) => state.questions.list;
-export const selectCurrentQuestion = (state) => state.questions.currentQuestion;
-export const selectQuestionsStatus = (state) => state.questions.status;
-export const selectQuestionsError = (state) => state.questions.error;
+export const selectQuestions = (state: any) => state.questions.list;
+export const selectCurrentQuestion = (state: any) => state.questions.currentQuestion;
+export const selectQuestionsStatus = (state: any) => state.questions.status;
+export const selectQuestionsError = (state: any) => state.questions.error;

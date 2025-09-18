@@ -1,10 +1,15 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./TextAudio.scss";
 import AudioPlayer, { RHAP_UI } from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 
-function TextAudio({ text, audio }) {
-  const textRef = useRef(null);
+type TextAudioProps = {
+  text?: string | null;
+  audio?: string | null;
+};
+
+export default function TextAudio({ text, audio }: TextAudioProps) {
+  const textRef = useRef<HTMLDivElement | null>(null);
   const [isScrollable, setIsScrollable] = useState(false);
 
   const checkOverflow = () => {
@@ -54,8 +59,8 @@ function TextAudio({ text, audio }) {
                 <img
                   src="/icons/play.svg"
                   alt="Play"
-                  width="16"
-                  height="16"
+                  width={16}
+                  height={16}
                   style={{ display: "block" }}
                 />
               ),
@@ -63,8 +68,8 @@ function TextAudio({ text, audio }) {
                 <img
                   src="/icons/pause.svg"
                   alt="Pause"
-                  width="16"
-                  height="16"
+                  width={16}
+                  height={16}
                   style={{ display: "block" }}
                 />
               ),
@@ -77,5 +82,3 @@ function TextAudio({ text, audio }) {
     </div>
   );
 }
-
-export default TextAudio;

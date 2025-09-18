@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import type { TypedUseSelectorHook } from "react-redux";
 import TextAudio from "../../components/TextAudio/TextAudio";
 import Button from "../../components/Button/Button";
 import Choices from "../Choices/Choices";

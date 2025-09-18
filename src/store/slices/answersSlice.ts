@@ -1,6 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
-const initialState = {
+type Status = "idle" | "loading" | "succeeded" | "failed";
+
+export interface Answer {
+  id: number | string;
+  question_id: number | string;
+  text: string;
+  next_question_id?: number | string | null;
+  send_variants?: boolean | null;
+  logo?: string | null;
+}
+
+interface AnswersState {
+  list: Answer[];
+  currentAnswers: Answer[];
+  status: Status;
+  error: string | null;
+}
+
+const initialState: AnswersState = {
   list: [],
   currentAnswers: [],
   status: "idle",
@@ -11,26 +30,33 @@ const answersSlice = createSlice({
   name: "answers",
   initialState,
   reducers: {
-    setAnswers: (state, action) => {
-      state.list = action.payload || [];
+    setAnswers(state, action: PayloadAction<Answer[] | undefined>) {
+      state.list = action.payload ?? [];
       state.status = "succeeded";
       state.error = null;
     },
-    setCurrentAnswers: (state, action) => {
+    setCurrentAnswers(
+      state,
+      action: PayloadAction<Answer[] | Answer | null | undefined>
+    ) {
       const payload = action.payload;
-      state.currentAnswers = Array.isArray(payload)
-        ? payload
-        : (payload ? [payload] : []);
+      if (Array.isArray(payload)) {
+        state.currentAnswers = payload;
+      } else if (payload) {
+        state.currentAnswers = [payload];
+      } else {
+        state.currentAnswers = [];
+      }
     },
-    setAnswersLoading: (state) => {
+    setAnswersLoading(state) {
       state.status = "loading";
       state.error = null;
     },
-    setAnswersError: (state, action) => {
+    setAnswersError(state, action: PayloadAction<string | null | undefined>) {
       state.status = "failed";
-      state.error = action.payload || "Unknown error";
+      state.error = action.payload ?? "Unknown error";
     },
-    resetAnswers: (state) => {
+    resetAnswers(state) {
       state.list = [];
       state.currentAnswers = [];
       state.status = "idle";
@@ -49,7 +75,9 @@ export const {
 
 export default answersSlice.reducer;
 
-export const selectAnswers = (state) => state.answers.list;
-export const selectCurrentAnswers = (state) => state.answers.currentAnswers;
-export const selectAnswersStatus = (state) => state.answers.status;
-export const selectAnswersError = (state) => state.answers.error;
+// селекторы
+export const selectAnswers = (state: any) => state.answers.list;
+export const selectCurrentAnswers = (state: any) =>
+  state.answers.currentAnswers;
+export const selectAnswersStatus = (state: any) => state.answers.status;
+export const selectAnswersError = (state: any) => state.answers.error;

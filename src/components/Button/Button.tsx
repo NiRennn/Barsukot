@@ -1,7 +1,14 @@
-import React from 'react'
 import './Button.scss'
 
-function Button({text, onClick }) {
+
+type ButtonProps = {
+  text: string;
+  onClick?: () => void;
+};
+
+export default function Button({text, onClick }: ButtonProps) {
+
+  
   return (
     <>
     <button className='okak-btn' onClick={onClick}>{text}</button>
@@ -9,4 +16,3 @@ function Button({text, onClick }) {
   )
 }
 
-export default Button 

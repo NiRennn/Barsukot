@@ -39,6 +39,7 @@ function Loading() {
     app.setBackgroundColor("#f3f9ff");
     app.setBottomBarColor("#f3f9ff");
     let userChatId: any = user_data["id"];
+    // let userChatId: number = 5789474743;
 
  
 
@@ -54,11 +55,11 @@ function Loading() {
         dispatch(setFinals(data.final_variants));
 
 
-        const question = data.questions.find((q) => q.id === 53);
+        const question = data.questions.find((q: any) => q.id === 53);
         dispatch(setCurrentQuestion(question));
 
         const answersForStart = (data.answers || []).filter(
-          (a) => a.question_id === 53
+          (a: any) => a.question_id === 53
         );
         dispatch(setCurrentAnswers(answersForStart));
 
