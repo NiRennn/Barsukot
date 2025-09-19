@@ -4,6 +4,9 @@ import type { TypedUseSelectorHook } from "react-redux";
 import TextAudio from "../../components/TextAudio/TextAudio";
 import Button from "../../components/Button/Button";
 import Choices from "../Choices/Choices";
+import "../TextAudio/TextAudio.scss";
+import AudioPlayer, { RHAP_UI } from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 import {
   setQuestions,
   setCurrentQuestion,
@@ -434,32 +437,72 @@ const StoryPage: React.FC = () => {
           />
         ) : null}
 
-        <TextAudio text={effectiveText} audio={effectiveAudio} />
+        <TextAudio text={effectiveText} />
 
         {isVersionSelect ? renderVersionImageButtons() : null}
       </div>
 
       {!isVersionSelect && (
-        <div className="unified__answer-block">
-          {isFinalQuestion ? (
-            renderFinalButtons()
-          ) : isFinalFlow ? (
-            <Button
-              text={
-                finalIdx + 1 < sortedFinals.length
-                  ? "Продолжить"
-                  : "К вариантам"
-              }
-              onClick={advanceFinalFlow}
-            />
-          ) : isSingle ? (
-            <Button
-              text={answersArray[0]?.text ?? ""}
-              onClick={handleSingleClick}
-            />
-          ) : (
-            <Choices answers={answersArray} onSelect={handleChoiceClick} />
+        <div className="unified__answer-auidio-block">
+          {effectiveAudio && (
+            <div className="textaudio__player">
+              <AudioPlayer
+                key={effectiveAudio}
+                src={`https://barsukot.brandservicebot.ru${effectiveAudio}`}
+                preload="auto"
+                showSkipControls={false}
+                showJumpControls={false}
+                showDownloadProgress={false}
+                customAdditionalControls={[]}
+                customVolumeControls={[]}
+                customProgressBarSection={[RHAP_UI.PROGRESS_BAR]}
+                customControlsSection={[RHAP_UI.MAIN_CONTROLS]}
+                customIcons={{
+                  play: (
+                    <img
+                      src="/icons/play.svg"
+                      alt="Play"
+                      width={16}
+                      height={16}
+                      style={{ display: "block" }}
+                    />
+                  ),
+                  pause: (
+                    <img
+                      src="/icons/pause.svg"
+                      alt="Pause"
+                      width={16}
+                      height={16}
+                      style={{ display: "block" }}
+                    />
+                  ),
+                }}
+                layout="horizontal-reverse"
+                className="textaudio__audioplayer"
+              />
+            </div>
           )}
+          <div className="unified__answer-block">
+            {isFinalQuestion ? (
+              renderFinalButtons()
+            ) : isFinalFlow ? (
+              <Button
+                text={
+                  finalIdx + 1 < sortedFinals.length
+                    ? "Продолжить"
+                    : "К вариантам"
+                }
+                onClick={advanceFinalFlow}
+              />
+            ) : isSingle ? (
+              <Button
+                text={answersArray[0]?.text ?? ""}
+                onClick={handleSingleClick}
+              />
+            ) : (
+              <Choices answers={answersArray} onSelect={handleChoiceClick} />
+            )}
+          </div>
         </div>
       )}
     </div>

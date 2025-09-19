@@ -120,6 +120,7 @@ function Loading() {
 
         if (isCancelled) return;
 
+
         dispatch(setQuestions(data.questions));
         dispatch(setAnswers(data.answers));
         dispatch(setFinals(data.final_variants));
