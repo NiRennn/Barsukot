@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, useMemo } from "react";
-import type { JSX} from 'react'
+import type { JSX } from "react";
 import "./TextAudio.scss";
 
 type TextAudioProps = {
@@ -16,7 +16,15 @@ export default function TextAudio({
 }: TextAudioProps) {
   const textRef = useRef<HTMLDivElement | null>(null);
   const [isScrollable, setIsScrollable] = useState(false);
-  const normalized = (text ?? "").replace(/\r\n/g, "\n");
+
+  const normalized = (text ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\u00A0/g, " ");
+
+  const isVersionQuestion = useMemo(() => {
+    const s = normalized.trim();
+    return /^Какую\s+версию(?:\s|\n)*выбираете\?\s*$/i.test(s);
+  }, [normalized]);
 
   const { label, rest } = useMemo(() => {
     if (!highlightVersionPrefix)
@@ -71,22 +79,29 @@ export default function TextAudio({
     <div className="textaudio">
       {normalized && (
         <div
-          className={`textaudio__textwrap ${
-            isScrollable ? "is-scrollable" : ""
-          }`}
+          className={[
+            "textaudio__textwrap",
+            isScrollable ? "is-scrollable" : "",
+            isVersionQuestion ? "textaudio__textwrap--version-question" : "",
+          ].join(" ")}
           ref={textRef}
           role="region"
           aria-label="Текст"
           tabIndex={0}
         >
-          <p className="textaudio__text">
+          <p
+            className={[
+              "textaudio__text",
+              isVersionQuestion ? "textaudio__text--version-question" : "",
+            ].join(" ")}
+          >
             {label ? (
               <>
                 <span className="textaudio__version-prefix">{label}</span>
                 <br />
               </>
             ) : null}
-            {renderWithPromo(rest)}
+            {isVersionQuestion ? rest : renderWithPromo(rest)}
           </p>
         </div>
       )}

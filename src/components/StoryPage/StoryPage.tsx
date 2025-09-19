@@ -24,7 +24,7 @@ export interface QuestionBtn {
   url?: string | null;
   logo?: string | null;
 }
-
+ 
 export interface Question {
   id: ID;
   text: string;
