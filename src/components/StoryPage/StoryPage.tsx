@@ -443,7 +443,7 @@ const StoryPage: React.FC = () => {
       </div>
 
       {!isVersionSelect && (
-        <div className="unified__answer-auidio-block">
+        <div className="unified__answer-auidio-block" >
           {effectiveAudio && (
             <div className="textaudio__player">
               <AudioPlayer

@@ -13,11 +13,11 @@
 .textaudio__textwrap {
   position: relative;
   width: 100%;
-  max-height: 180px;
+  max-height: 170px;
   overflow: auto;
   padding-right: 6px;
   scrollbar-gutter: stable both-edges;
-  overflow: auto;
+  // padding-bottom: 50px;
 }
 
 .textaudio__textwrap::-webkit-scrollbar {
@@ -25,7 +25,8 @@
 }
 .textaudio__textwrap::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.35);
+  // background: rgba(255, 255, 255, 0.35);
+  background: transparent;
 }
 .textaudio__textwrap::-webkit-scrollbar-track {
   background: transparent;
@@ -42,7 +43,7 @@
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 50%,
     rgba(0, 0, 0, 0.55) 100%
   );
   border-bottom-left-radius: 6px;
@@ -62,7 +63,7 @@
 
 .textaudio__player {
   width: 100%;
-  max-width: 300px;
+  max-width: 278px;
   height: 43px;
   background: linear-gradient(180deg, #38322f 0%, #312e30 100%);
   border-radius: 9999px;
