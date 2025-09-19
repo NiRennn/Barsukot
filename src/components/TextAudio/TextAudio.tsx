@@ -16,13 +16,15 @@ export default function TextAudio({
 }: TextAudioProps) {
   const textRef = useRef<HTMLDivElement | null>(null);
   const [isScrollable, setIsScrollable] = useState(false);
+  const [atTop, setAtTop] = useState(true);
+  const [atBottom, setAtBottom] = useState(true);
 
   const normalized = (text ?? "")
     .replace(/\r\n/g, "\n")
     .replace(/\u00A0/g, " ");
 
   const isVersionQuestion = useMemo(() => {
-    const s = normalized.trim();
+    const s = normalized.trim().replace(/[«»"“”]/g, "");
     return /^Какую\s+версию(?:\s|\n)*выбираете\?\s*$/i.test(s);
   }, [normalized]);
 
@@ -60,30 +62,52 @@ export default function TextAudio({
     return out;
   };
 
-  const checkOverflow = () => {
+  const recomputeScrollFlags = () => {
     const el = textRef.current;
     if (!el) return;
-    setIsScrollable(el.scrollHeight > el.clientHeight + 1);
+
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const epsilon = 1;
+    setIsScrollable(scrollHeight > clientHeight + epsilon);
+    setAtTop(scrollTop <= epsilon);
+    setAtBottom(scrollTop + clientHeight >= scrollHeight - epsilon);
   };
 
   useLayoutEffect(() => {
-    checkOverflow();
+    recomputeScrollFlags();
   }, [normalized]);
 
   useEffect(() => {
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
+    const el = textRef.current;
+    if (!el) return;
+
+    const onScroll = () => recomputeScrollFlags();
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    const onResize = () => recomputeScrollFlags();
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
+
+  const wrapClasses = [
+    "textaudio__textwrap",
+    isScrollable ? "is-scrollable" : "",
+    isVersionQuestion ? "textaudio__textwrap--version-question" : "",
+    isScrollable && !atTop ? "has-top-fade" : "",
+    isScrollable && !atBottom ? "has-bottom-fade" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="textaudio">
       {normalized && (
         <div
-          className={[
-            "textaudio__textwrap",
-            isScrollable ? "is-scrollable" : "",
-            isVersionQuestion ? "textaudio__textwrap--version-question" : "",
-          ].join(" ")}
+          className={wrapClasses}
           ref={textRef}
           role="region"
           aria-label="Текст"
