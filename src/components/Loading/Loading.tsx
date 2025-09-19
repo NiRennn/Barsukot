@@ -47,6 +47,7 @@ function Loading() {
         platform === "unknown"
       ) {
         window.Telegram.WebApp.exitFullscreen();
+        window.Telegram.WebApp.setMinimumHeight(500);
       }
       window.Telegram.WebApp.expand();
     } catch (e) {
