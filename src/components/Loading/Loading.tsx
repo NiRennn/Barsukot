@@ -25,7 +25,7 @@ function Loading() {
       query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
     }
     return query;
-  }
+  } 
 
   useEffect(() => {
     const app = (window as any)?.Telegram?.WebApp;

@@ -272,7 +272,7 @@ const StoryPage: React.FC = () => {
       dispatch(setCurrentQuestion(first));
       dispatch(setCurrentAnswers(firstAnswers));
       setIsBlinking(false);
-    }, 700);
+    }, 800);
   }, [answersList, dispatch, questionsList]);
 
   const startFinalFlow = useCallback(() => {
@@ -323,7 +323,7 @@ const StoryPage: React.FC = () => {
         dispatch(setCurrentAnswers(nextAnswers));
 
         setIsBlinking(false);
-      }, 700);
+      }, 800);
     },
     [answersList, dispatch, questionsList, startFinalFlow]
   );
@@ -333,7 +333,9 @@ const StoryPage: React.FC = () => {
 
   const finalSlide = isFinalFlow ? sortedFinals[finalIdx] : null;
   const effectiveText = isFinalFlow ? finalSlide?.text ?? "" : questionText;
-  const effectiveAudio = isFinalFlow ? finalSlide?.audio ?? null : questionAudio;
+  const effectiveAudio = isFinalFlow
+    ? finalSlide?.audio ?? null
+    : questionAudio;
   const effectivePicture = isFinalFlow
     ? finalSlide?.picture ?? null
     : questionPicture;
@@ -456,7 +458,7 @@ const StoryPage: React.FC = () => {
           />
         ) : null}
 
-        <TextAudio text={effectiveText} />
+        <TextAudio text={effectiveText} highlightVersionPrefix={isFinalFlow}/>
 
         {isVersionSelect ? renderVersionImageButtons() : null}
       </div>
