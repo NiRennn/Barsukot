@@ -13,7 +13,6 @@ import {
 } from "../../store/slices/questionsSlice";
 import { setAnswers, setCurrentAnswers } from "../../store/slices/answersSlice";
 import { setFinals, selectFinals } from "../../store/slices/finalsSlice";
-
 import "./StoryPage.scss";
 import AgainButton from "../AgainButton/AgainButton";
 
@@ -33,7 +32,7 @@ export interface Question {
   picture?: string | null;
   order?: number | null;
   final?: boolean;
-  btns?: QuestionBtn[]; // кнопки из БД на финальном экране
+  btns?: QuestionBtn[];
 }
 export interface Answer {
   id: ID;
@@ -59,6 +58,7 @@ export interface RootState {
       id: ID;
       text: string;
       audio?: string | null;
+      picture?: string | null;
       order?: number | null;
     }[];
   };
@@ -180,7 +180,7 @@ const StoryPage: React.FC = () => {
         dispatch(setAnswers(data.answers));
         dispatch(setFinals(data.final_variants));
 
-        const savedIdStr = sessionStorage.getItem("barsukot.currentQuestionId");
+        const savedIdStr = sessionStorage.getItem(STORAGE_KEY);
         const savedId = savedIdStr ? Number(savedIdStr) : NaN;
         const byId = data.questions.find((q: any) => q.id === savedId);
         const byOrder = [...data.questions].sort(
@@ -333,42 +333,59 @@ const StoryPage: React.FC = () => {
 
   const finalSlide = isFinalFlow ? sortedFinals[finalIdx] : null;
   const effectiveText = isFinalFlow ? finalSlide?.text ?? "" : questionText;
-  const effectiveAudio = isFinalFlow
-    ? finalSlide?.audio ?? null
-    : questionAudio;
+  const effectiveAudio = isFinalFlow ? finalSlide?.audio ?? null : questionAudio;
+  const effectivePicture = isFinalFlow
+    ? finalSlide?.picture ?? null
+    : questionPicture;
+
+  const versionAnswerByNumber = useMemo(() => {
+    const map = new Map<number, Answer>();
+    answersArray.forEach((ans) => {
+      const m = (ans.text || "").match(/(\d+)/);
+      if (m) map.set(Number(m[1]), ans);
+    });
+    return map;
+  }, [answersArray]);
 
   const renderVersionImageButtons = () => {
-    if (!answersArray.length) return null;
+    if (!sortedFinals.length) return null;
+
     return (
       <div className="unified__versions">
-        {answersArray.map((ans) => {
-          const src = makeAbsolute(ans.logo || null);
-          const label = ans.text || "Вариант";
+        {sortedFinals.map((fin, idx) => {
+          const src = makeAbsolute(fin.picture || null);
+          const versionNumber = fin.order ?? idx + 1;
+          const ans =
+            versionAnswerByNumber.get(versionNumber) ||
+            versionAnswerByNumber.get(idx + 1) ||
+            answersArray[idx];
+
           if (!src) {
             return (
               <button
-                key={String(ans.id)}
+                key={`ver-fallback-${String(fin.id)}`}
                 className="unified__version-fallbackButton"
-                onClick={() => handleChoiceClick(ans)}
                 type="button"
-                aria-label={label}
-                title={label}
+                onClick={() => ans && handleChoiceClick(ans)}
+                aria-label={`Версия ${versionNumber}`}
+                title={`Версия ${versionNumber}`}
               >
-                {label}
+                Версия {versionNumber}
               </button>
             );
           }
+
           return (
             <input
-              key={String(ans.id)}
+              key={`ver-img-${String(fin.id)}`}
               type="image"
-              alt={label}
-              title={label}
+              alt={`Версия ${versionNumber}`}
+              title={`Версия ${versionNumber}`}
               src={src}
               className="unified__version-imageButton"
               onClick={(e) => {
                 e.preventDefault();
-                handleChoiceClick(ans);
+                if (ans) handleChoiceClick(ans);
               }}
             />
           );
@@ -407,6 +424,8 @@ const StoryPage: React.FC = () => {
     );
   };
 
+  const audioSrc = effectiveAudio ? makeAbsolute(effectiveAudio) || "" : "";
+
   return (
     <div
       className={[
@@ -427,9 +446,9 @@ const StoryPage: React.FC = () => {
       />
 
       <div className="unified__content-block">
-        {!isFinalFlow && !isVersionSelect && questionPicture ? (
+        {!isVersionSelect && effectivePicture ? (
           <img
-            src={makeAbsolute(questionPicture) || ""}
+            src={makeAbsolute(effectivePicture) || ""}
             alt="Barsukot-story-image"
             className="unified__story-image"
             loading="lazy"
@@ -443,45 +462,47 @@ const StoryPage: React.FC = () => {
       </div>
 
       {!isVersionSelect && (
-        <div className="unified__answer-auidio-block" >
-          {effectiveAudio && (
-            <div className="textaudio__player">
-              <AudioPlayer
-                key={effectiveAudio}
-                src={`https://barsukot.brandservicebot.ru${effectiveAudio}`}
-                preload="auto"
-                showSkipControls={false}
-                showJumpControls={false}
-                showDownloadProgress={false}
-                customAdditionalControls={[]}
-                customVolumeControls={[]}
-                customProgressBarSection={[RHAP_UI.PROGRESS_BAR]}
-                customControlsSection={[RHAP_UI.MAIN_CONTROLS]}
-                customIcons={{
-                  play: (
-                    <img
-                      src="/icons/play.svg"
-                      alt="Play"
-                      width={16}
-                      height={16}
-                      style={{ display: "block" }}
-                    />
-                  ),
-                  pause: (
-                    <img
-                      src="/icons/pause.svg"
-                      alt="Pause"
-                      width={16}
-                      height={16}
-                      style={{ display: "block" }}
-                    />
-                  ),
-                }}
-                layout="horizontal-reverse"
-                className="textaudio__audioplayer"
-              />
-            </div>
-          )}
+        <div className="unified__answer-auidio-block">
+          <div
+            className={`textaudio__player ${audioSrc ? "" : "is-disabled"}`}
+            aria-disabled={audioSrc ? undefined : true}
+          >
+            <AudioPlayer
+              key={audioSrc || "no-audio"}
+              src={audioSrc}
+              preload="auto"
+              showSkipControls={false}
+              showJumpControls={false}
+              showDownloadProgress={false}
+              customAdditionalControls={[]}
+              customVolumeControls={[]}
+              customProgressBarSection={[RHAP_UI.PROGRESS_BAR]}
+              customControlsSection={[RHAP_UI.MAIN_CONTROLS]}
+              customIcons={{
+                play: (
+                  <img
+                    src="/icons/play.svg"
+                    alt="Play"
+                    width={16}
+                    height={16}
+                    style={{ display: "block" }}
+                  />
+                ),
+                pause: (
+                  <img
+                    src="/icons/pause.svg"
+                    alt="Pause"
+                    width={16}
+                    height={16}
+                    style={{ display: "block" }}
+                  />
+                ),
+              }}
+              layout="horizontal-reverse"
+              className="textaudio__audioplayer"
+            />
+          </div>
+
           <div className="unified__answer-block">
             {isFinalQuestion ? (
               renderFinalButtons()

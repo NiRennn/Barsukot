@@ -8,7 +8,8 @@ export interface FinalVariant {
   id: ID;
   text: string;
   audio?: string | null;
-  order?: number | null;
+  picture?: string  | null;
+  order?: number | null; 
 }
 
 export interface FinalsState {
