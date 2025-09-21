@@ -231,18 +231,21 @@
 @media (max-height: 700px) {
   .unified__logo {
     margin-top: 24px;
-    // margin-bottom: 8px;
+    margin-bottom: 9px;
   }
 
   .unified__content-block {
     gap: 0;
-    margin-top: -30px;
+    // margin-top: -40px;
   }
 
   .unified__story-image {
-    transform: scale(1.1);
+    transform: scale(1.05);
     width: 100%;
     object-fit: cover;
+    margin-bottom: -35px;
+    margin-top: -40px;
+
   }
 
   .textaudio {
