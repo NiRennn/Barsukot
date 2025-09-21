@@ -230,7 +230,14 @@
 @media (max-height: 600px) {
 .textaudio__textwrap {
   max-height: 140px;
-  padding-bottom: 40px;
+  padding-bottom: 60px;
 
 }
 }
+
+@media (min-height: 801px) {
+  .textaudio__textwrap {
+    padding-bottom: 0 !important;
+  }
+}
+
