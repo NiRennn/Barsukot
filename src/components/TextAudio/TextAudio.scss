@@ -16,7 +16,7 @@
   position: relative;
   width: 100%;
   height: auto;
-  max-height: 150px;
+  max-height: 140px;
   overflow: auto;
   padding-right: 6px;
   scrollbar-gutter: stable both-edges;
@@ -49,25 +49,24 @@
 .textaudio__textwrap::-webkit-scrollbar-track {
   background: transparent;
 }
-
-// .textaudio__textwrap.is-scrollable::after {
+// .textaudio__textwrap.is-scrollable.has-bottom-fade::after {
 //   content: "";
 //   position: sticky;
-//   left: 0;
-//   right: 0;
 //   bottom: 0;
-//   height: 36px;
 //   display: block;
+//   height: 36px;
+//   // margin-top: -36px; 
 //   pointer-events: none;
+//   z-index: 1;
 //   background: linear-gradient(
 //     to bottom,
 //     rgba(0, 0, 0, 0) 50%,
 //     rgba(0, 0, 0, 0.55) 100%
 //   );
-//   border-bottom-left-radius: 6px;
-//   border-bottom-right-radius: 6px;
-//   margin-top: -36px;
 // }
+
+
+
 
 
 
@@ -228,3 +227,10 @@
 }
 
 
+@media (max-height: 600px) {
+.textaudio__textwrap {
+  max-height: 140px;
+  padding-bottom: 40px;
+
+}
+}

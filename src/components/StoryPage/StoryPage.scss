@@ -78,7 +78,6 @@
   gap: 0;
   margin: 0;
   padding: 0;
-  
 }
 
 .unified__version-imageButton {
@@ -101,8 +100,6 @@
   flex-direction: column-reverse;
   gap: 8px;
 }
-
-
 
 .eyelid {
   position: absolute;
@@ -243,9 +240,8 @@
     transform: scale(1.05);
     width: 100%;
     object-fit: cover;
-    margin-bottom: -35px;
+    // margin-bottom: -35px;
     margin-top: -40px;
-
   }
 
   .textaudio {
@@ -255,6 +251,10 @@
   .unified__answer-auidio-block {
     gap: 0;
   }
+}
 
-
+@media (max-height: 600px) {
+  .unified__story-image {
+    margin-bottom: -20px;
+  }
 }
