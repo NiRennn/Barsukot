@@ -106,19 +106,20 @@ export default function TextAudio({
   return (
     <div className="textaudio">
       {normalized && (
-        <div
-          className={wrapClasses}
-          ref={textRef}
-          role="region"
-          aria-label="Текст"
-          tabIndex={0}
-        >
-          <p
-            className={[
-              "textaudio__text",
-              isVersionQuestion ? "textaudio__text--version-question" : "",
-            ].join(" ")}
-          >
+<div
+  className={wrapClasses}
+  ref={textRef}
+  role="region"
+  aria-label="Текст"
+  tabIndex={0}
+  style={isVersionQuestion ? { paddingBottom: 0 } : undefined}
+>
+  <p
+    className={[
+      "textaudio__text",
+      isVersionQuestion ? "textaudio__text--version-question" : "",
+    ].join(" ")}
+  >
             {label ? (
               <>
                 <span className="textaudio__version-prefix">{label}</span>

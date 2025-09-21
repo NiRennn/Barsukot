@@ -10,16 +10,21 @@
   margin-top: 20px;
 }
 
+
+
 .textaudio__textwrap {
   position: relative;
   width: 100%;
-  max-height: 180px;
+  height: auto;
+  max-height: 150px;
   overflow: auto;
   padding-right: 6px;
   scrollbar-gutter: stable both-edges;
-  // padding-bottom: 50px;
+  padding-bottom: 90px;
 
 }
+
+
 
 .choose {
   padding-top: 30px;
@@ -45,24 +50,26 @@
   background: transparent;
 }
 
-.textaudio__textwrap.is-scrollable::after {
-  content: "";
-  position: sticky;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 36px;
-  display: block;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 50%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  margin-top: -36px;
-}
+// .textaudio__textwrap.is-scrollable::after {
+//   content: "";
+//   position: sticky;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   height: 36px;
+//   display: block;
+//   pointer-events: none;
+//   background: linear-gradient(
+//     to bottom,
+//     rgba(0, 0, 0, 0) 50%,
+//     rgba(0, 0, 0, 0.55) 100%
+//   );
+//   border-bottom-left-radius: 6px;
+//   border-bottom-right-radius: 6px;
+//   margin-top: -36px;
+// }
+
+
 
 .textaudio__text {
   color: #ffffff;
@@ -122,6 +129,23 @@
   position: relative;
   cursor: pointer;
   box-shadow: 0 4px 25px rgba(253, 187, 5, 0.34);
+}
+
+
+.textaudio__text--version-question {
+  color: #fdbb05;
+  font-size: 24px;
+  font-weight: 600;
+  // margin-bottom: 20px;
+  max-width: 300px;
+  width: 100%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  // padding-top: 40px;
+    // padding-bottom: 0 !important;
+  margin-top: 20px;
 }
 
 .textaudio__audioplayer .rhap_progress-section {
@@ -202,16 +226,4 @@
   margin-left: 0 !important;
 }
 
-.textaudio__text--version-question {
-  color: #fdbb05;
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  max-width: 300px;
-  width: 100%;
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
-  // padding-top: 40px;
-}
+
