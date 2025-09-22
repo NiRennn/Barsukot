@@ -15,7 +15,7 @@
 .textaudio__textwrap {
   position: relative;
   width: 100%;
-  height: auto;
+  height: 100%;
   max-height: 140px;
   overflow: auto;
   padding-right: 6px;
@@ -230,7 +230,7 @@
 @media (max-height: 600px) {
 .textaudio__textwrap {
   max-height: 140px;
-  padding-bottom: 60px;
+  padding-bottom: 70px;
 
 }
 }
@@ -241,3 +241,8 @@
   }
 }
 
+@media (min-height: 890px) {
+  .textaudio__textwrap {
+    max-height: 220px;
+  }
+}
