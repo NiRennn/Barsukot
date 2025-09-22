@@ -533,7 +533,7 @@ const StoryPage: React.FC = () => {
             decoding="async"
           />
         ) : null}
-
+ 
         <TextAudio
           key={`${isFinalFlow ? "final" : "q"}-${String(
             currentQuestion?.id ?? "start"

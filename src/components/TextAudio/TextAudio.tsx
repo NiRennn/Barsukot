@@ -20,13 +20,21 @@ export default function TextAudio({
   const [atBottom, setAtBottom] = useState(true);
 
   const normalized = (text ?? "")
-    .replace(/\r\n/g, "\n")
+    .replace(/\r\n/g, "\n") 
     .replace(/\u00A0/g, " ");
 
   const isVersionQuestion = useMemo(() => {
     const s = normalized.trim().replace(/[«»"“”]/g, "");
     return /^Какую\s+версию(?:\s|\n)*выбираете\?\s*$/i.test(s);
   }, [normalized]);
+
+  if (isVersionQuestion) {
+  return (
+    <div className="textaudio textaudio--version-select">
+      <p className="textaudio__version-header">{normalized}</p>
+    </div>
+  );
+}
 
   const { label, rest } = useMemo(() => {
     if (!highlightVersionPrefix)
