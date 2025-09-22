@@ -23,7 +23,7 @@ import "./StoryPage.scss";
 import AgainButton from "../AgainButton/AgainButton";
 
 type ID = number | string;
- 
+
 export interface QuestionBtn {
   id: ID;
   text: string;
@@ -510,10 +510,15 @@ const StoryPage: React.FC = () => {
         "unified",
         isOpeningOnMount ? "unified--open" : "",
         isBlinking ? "unified--blink" : "",
+        isVersionSelect ? "unified--scroll" : "",
       ].join(" ")}
     >
-      <div className="eyelid eyelid--top" aria-hidden="true" />
-      <div className="eyelid eyelid--bottom" aria-hidden="true" />
+      {!isVersionSelect && (
+        <>
+          <div className="eyelid eyelid--top" aria-hidden="true" />
+          <div className="eyelid eyelid--bottom" aria-hidden="true" />
+        </>
+      )}
 
       <img
         src="/images/BadgerCat2_logo+zverdetectiv.svg"
@@ -533,7 +538,7 @@ const StoryPage: React.FC = () => {
             decoding="async"
           />
         ) : null}
- 
+
         <TextAudio
           key={`${isFinalFlow ? "final" : "q"}-${String(
             currentQuestion?.id ?? "start"

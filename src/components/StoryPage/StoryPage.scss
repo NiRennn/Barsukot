@@ -36,7 +36,8 @@
 
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+
+
 }
 
 .unified__story-image {
@@ -63,18 +64,12 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   width: 100%;
   max-width: 500px;
-
   background-color: #352c30;
   padding-top: 8px;
   border-radius: 40px 40px 0 0;
-
   box-shadow: 0px -22px 11px 3px rgba(0,0,0,0.83)
-
-
-
 }
 
 .unified__answer-block {
@@ -97,9 +92,16 @@
   align-items: center;
   justify-content: center;
   gap: 0;
+
   margin: 0;
   margin-top: 8px;
   padding: 0;
+
+
+}
+
+.unified--scroll {
+  height: 100%;
   // overflow: auto;
 }
 
