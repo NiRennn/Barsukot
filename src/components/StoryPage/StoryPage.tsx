@@ -519,7 +519,7 @@ const StoryPage: React.FC = () => {
         src="/images/BadgerCat2_logo+zverdetectiv.svg"
         alt="Barsukot-Logo"
         className="unified__logo"
-        loading="eager"
+        // loading="eager"
         decoding="async"
       />
 
@@ -529,7 +529,7 @@ const StoryPage: React.FC = () => {
             src={makeAbsolute(effectivePicture) || ""}
             alt="Barsukot-story-image"
             className="unified__story-image"
-            loading="lazy"
+            // loading="lazy"
             decoding="async"
           />
         ) : null}
