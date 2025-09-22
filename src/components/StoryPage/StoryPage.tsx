@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { TypedUseSelectorHook } from "react-redux";
 import TextAudio from "../../components/TextAudio/TextAudio";
@@ -24,7 +30,7 @@ export interface QuestionBtn {
   url?: string | null;
   logo?: string | null;
 }
- 
+
 export interface Question {
   id: ID;
   text: string;
@@ -125,6 +131,62 @@ const StoryPage: React.FC = () => {
 
   const [isFinalFlow, setIsFinalFlow] = useState(false);
   const [finalIdx, setFinalIdx] = useState(0);
+
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  const footerNodeRef = useRef<HTMLDivElement | null>(null);
+  const roRef = useRef<ResizeObserver | null>(null);
+
+  const setCSSVar = useCallback((px: number) => {
+    const target: HTMLElement =
+      rootRef.current ?? (document.documentElement as HTMLElement);
+    target.style.setProperty("--answer-h", `${Math.max(0, Math.ceil(px))}px`);
+  }, []);
+
+  const measureFooter = useCallback(() => {
+    const node = footerNodeRef.current;
+    if (!node) {
+      setCSSVar(0);
+      return;
+    }
+    const r = node.getBoundingClientRect();
+    setCSSVar(r.height || node.offsetHeight || node.clientHeight || 0);
+  }, [setCSSVar]);
+
+  const setFooterRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (roRef.current) {
+        roRef.current.disconnect();
+        roRef.current = null;
+      }
+      footerNodeRef.current = node;
+
+      if (!node) {
+        setCSSVar(0);
+        return;
+      }
+
+      measureFooter();
+      requestAnimationFrame(measureFooter);
+      setTimeout(measureFooter, 80);
+
+      if (typeof ResizeObserver !== "undefined") {
+        const ro = new ResizeObserver(() => measureFooter());
+        ro.observe(node);
+        roRef.current = ro;
+      }
+
+      window.addEventListener("resize", measureFooter, { passive: true });
+    },
+    [measureFooter, setCSSVar]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (roRef.current) roRef.current.disconnect();
+      window.removeEventListener("resize", measureFooter);
+    };
+  }, [measureFooter]);
 
   const sortedFinals = useMemo(
     () =>
@@ -428,8 +490,22 @@ const StoryPage: React.FC = () => {
 
   const audioSrc = effectiveAudio ? makeAbsolute(effectiveAudio) || "" : "";
 
+  useEffect(() => {
+    measureFooter();
+    const t = setTimeout(measureFooter, 80);
+    return () => clearTimeout(t);
+  }, [
+    measureFooter,
+    audioSrc,
+    isFinalQuestion,
+    isFinalFlow,
+    finalIdx,
+    answersArray.length,
+  ]);
+
   return (
     <div
+      ref={rootRef}
       className={[
         "unified",
         isOpeningOnMount ? "unified--open" : "",
@@ -458,13 +534,21 @@ const StoryPage: React.FC = () => {
           />
         ) : null}
 
-        <TextAudio text={effectiveText} highlightVersionPrefix={isFinalFlow}/>
+        <TextAudio
+          key={`${isFinalFlow ? "final" : "q"}-${String(
+            currentQuestion?.id ?? "start"
+          )}-${finalIdx}`}
+          text={effectiveText}
+          highlightVersionPrefix={isFinalFlow}
+        />
 
         {isVersionSelect ? renderVersionImageButtons() : null}
+
+        <div className="unified__spacer" aria-hidden="true" />
       </div>
 
       {!isVersionSelect && (
-        <div className="unified__answer-auidio-block">
+        <div className="unified__answer-audio-block" ref={setFooterRef}>
           <div
             className={`textaudio__player ${audioSrc ? "" : "is-disabled"}`}
             aria-disabled={audioSrc ? undefined : true}
