@@ -23,7 +23,7 @@ import "./StoryPage.scss";
 import AgainButton from "../AgainButton/AgainButton";
 
 type ID = number | string;
-
+ 
 export interface QuestionBtn {
   id: ID;
   text: string;
