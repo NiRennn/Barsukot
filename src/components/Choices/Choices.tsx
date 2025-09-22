@@ -29,7 +29,7 @@ const Choices: React.FC<ChoicesProps> = ({ answers, onSelect }) => {
           className="choices__button"
           onClick={() => onSelect(answer)}
         >
-          {index === 0 && answer.id === 87 && (
+          {index === 0 && answer.id === 86 && (
             <img
               src="/icons/Tooltip.svg"
               alt="tooltip"
