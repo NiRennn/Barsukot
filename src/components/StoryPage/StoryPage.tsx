@@ -125,6 +125,7 @@ const StoryPage: React.FC = () => {
     (state) => state.answers
   );
   const finalsList = useAppSelector(selectFinals);
+  const userId = Number(localStorage.getItem("user_id"));
 
   const [isOpeningOnMount, setIsOpeningOnMount] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
@@ -142,6 +143,18 @@ const StoryPage: React.FC = () => {
       rootRef.current ?? (document.documentElement as HTMLElement);
     target.style.setProperty("--answer-h", `${Math.max(0, Math.ceil(px))}px`);
   }, []);
+
+  const saveVariantSelection = useCallback(
+    (variantId: number) => {
+      if (!userId) return;
+      fetch("https://barsukot.brandservicebot.ru/api/save_user_data/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, variant_id: variantId }),
+      }).catch((err) => console.warn("save_user_data failed", err));
+    },
+    [userId]
+  );
 
   const measureFooter = useCallback(() => {
     const node = footerNodeRef.current;
@@ -391,7 +404,9 @@ const StoryPage: React.FC = () => {
   );
 
   const handleSingleClick = () => goToNext(answersArray[0]);
-  const handleChoiceClick = (answer: Answer) => goToNext(answer);
+  const handleChoiceClick = (answer: Answer) => {
+    goToNext(answer);
+  };
 
   const finalSlide = isFinalFlow ? sortedFinals[finalIdx] : null;
   const effectiveText = isFinalFlow ? finalSlide?.text ?? "" : questionText;
@@ -449,6 +464,9 @@ const StoryPage: React.FC = () => {
               className="unified__version-imageButton"
               onClick={(e) => {
                 e.preventDefault();
+
+                saveVariantSelection(Number(fin.id));
+
                 if (ans) handleChoiceClick(ans);
               }}
             />

@@ -25,7 +25,7 @@ function Loading() {
       query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
     }
     return query;
-  } 
+  }
 
   useEffect(() => {
     const app = (window as any)?.Telegram?.WebApp;
@@ -86,6 +86,9 @@ function Loading() {
 
     const effectiveUserId = parseTgUserId() ?? getUserIdFromQuery();
 
+    localStorage.setItem("user_id", String(effectiveUserId))
+
+
     let isCancelled = false;
 
     const preloadImage = (src: string) =>
@@ -113,6 +116,14 @@ function Loading() {
           return;
         }
 
+        await fetch("https://barsukot.brandservicebot.ru/api/save_user_data/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ user_id: effectiveUserId }),
+        });
+
         const [data] = await Promise.all([
           fetch(
             `https://barsukot.brandservicebot.ru/api/get_user_data/?user_id=${effectiveUserId}`
@@ -120,7 +131,6 @@ function Loading() {
         ]);
 
         if (isCancelled) return;
-
 
         dispatch(setQuestions(data.questions));
         dispatch(setAnswers(data.answers));
