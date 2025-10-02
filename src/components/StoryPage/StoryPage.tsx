@@ -347,7 +347,7 @@ const StoryPage: React.FC = () => {
       dispatch(setCurrentQuestion(first));
       dispatch(setCurrentAnswers(firstAnswers));
       setIsBlinking(false);
-    }, 800);
+    }, 1000);
   }, [answersList, dispatch, questionsList]);
 
   const startFinalFlow = useCallback(() => {
@@ -398,7 +398,7 @@ const StoryPage: React.FC = () => {
         dispatch(setCurrentAnswers(nextAnswers));
 
         setIsBlinking(false);
-      }, 800);
+      }, 1000);
     },
     [answersList, dispatch, questionsList, startFinalFlow]
   );

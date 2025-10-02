@@ -19,7 +19,7 @@ const Choices: React.FC<ChoicesProps> = ({ answers, onSelect }) => {
   if (!Array.isArray(answers) || answers.length === 0) {
     return <div className="choices__empty">Нет доступных ответов</div>;
   }
-
+ 
   return (
     <div className="choices" role="list">
       {answers.map((answer, index) => (
