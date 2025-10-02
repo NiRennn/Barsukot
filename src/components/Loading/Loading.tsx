@@ -144,9 +144,11 @@ function Loading() {
         );
         dispatch(setCurrentAnswers(answersForStart));
 
+            const afterApiDelay = new Promise<void>((res) => setTimeout(res, 2000));
+
         const imagesReady = Promise.all(criticalImages.map(preloadImage));
-        const minDelay = new Promise<void>((res) => setTimeout(res, 1200));
-        await Promise.all([imagesReady, minDelay]);
+        // const minDelay = new Promise<void>((res) => setTimeout(res, 1200));
+        await Promise.all([imagesReady, afterApiDelay]);
 
         if (isCancelled) return;
         navigate(appRoutes.STORY, { replace: true });
