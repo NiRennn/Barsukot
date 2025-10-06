@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useMemo } from "react";
-import type { JSX } from "react";
+// import type { JSX } from "react";
 import "./TextAudio.scss";
+import { processHtml } from "../../utils/processHtml";
 
 type TextAudioProps = {
   text?: string | null;
@@ -20,7 +21,7 @@ export default function TextAudio({
   const [atBottom, setAtBottom] = useState(true);
 
   const normalized = (text ?? "")
-    .replace(/\r\n/g, "\n") 
+    .replace(/\r\n/g, "\n")
     .replace(/\u00A0/g, " ");
 
   const isVersionQuestion = useMemo(() => {
@@ -29,12 +30,12 @@ export default function TextAudio({
   }, [normalized]);
 
   if (isVersionQuestion) {
-  return (
-    <div className="textaudio textaudio--version-select">
-      <p className="textaudio__version-header">{normalized}</p>
-    </div>
-  );
-}
+    return (
+      <div className="textaudio textaudio--version-select">
+        <p className="textaudio__version-header">{normalized}</p>
+      </div>
+    );
+  }
 
   const { label, rest } = useMemo(() => {
     if (!highlightVersionPrefix)
@@ -49,26 +50,15 @@ export default function TextAudio({
     []
   );
 
-  const renderWithPromo = (s: string) => {
-    if (!highlightPromo) return s;
-    const matches = [...s.matchAll(promoRegex)];
-    if (matches.length === 0) return s;
+  const contentHtml = useMemo(() => {
+    const html = processHtml(rest);
 
-    const out: (string | JSX.Element)[] = [];
-    let last = 0;
-    matches.forEach((m, idx) => {
-      const i = m.index ?? 0;
-      if (i > last) out.push(s.slice(last, i));
-      out.push(
-        <span className="textaudio__promo" key={`promo-${i}-${idx}`}>
-          {m[0]}
-        </span>
-      );
-      last = i + m[0].length;
-    });
-    if (last < s.length) out.push(s.slice(last));
-    return out;
-  };
+    if (!highlightPromo) return html;
+    return html.replace(
+      promoRegex,
+      (m) => `<span class="textaudio__promo">${m}</span>`
+    );
+  }, [rest, highlightPromo, promoRegex]);
 
   const recomputeScrollFlags = () => {
     const el = textRef.current;
@@ -133,7 +123,10 @@ export default function TextAudio({
                 <br />
               </>
             ) : null}
-            {isVersionQuestion ? rest : renderWithPromo(rest)}
+
+            <span
+              dangerouslySetInnerHTML={{ __html: isVersionQuestion ? rest : contentHtml }}
+            />
           </p>
         </div>
       )}

@@ -21,6 +21,9 @@ import { setAnswers, setCurrentAnswers } from "../../store/slices/answersSlice";
 import { setFinals, selectFinals } from "../../store/slices/finalsSlice";
 import "./StoryPage.scss";
 import AgainButton from "../AgainButton/AgainButton";
+// import { processHtml } from "../../utils/processHtml";
+
+
 
 type ID = number | string;
 
@@ -81,6 +84,8 @@ const makeAbsolute = (path?: string | null) => {
   if (/^https?:\/\//i.test(path)) return path;
   return `https://barsukot.brandservicebot.ru${path}`;
 };
+
+
 
 const parseQuery = (queryString: string): any => {
   const query: any = {};
